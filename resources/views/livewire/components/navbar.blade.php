@@ -115,6 +115,10 @@
 
                     @if (Auth::user()->role === 'kepala_sekolah')
                         {{-- placeholder --}}
+                        <li><a href="{{ route('kepala-sekolah.dashboard.index') }}" class="mobile-nav-item">📊
+                                Dashboard</a>
+                        </li>
+                        <li><a href="{{ route('kepala-sekolah.reports.index') }}" class="mobile-nav-item">Report</a></li>
                     @endif
                 @endauth
             </ul>
@@ -264,6 +268,8 @@
                     <li><a href="{{ route('wali-murid.riwayat.index') }}" class="mobile-nav-item">🧾 Riwayat</a></li>
                 @endif
             @endauth
+
+
         </ul>
 
         {{-- Divider --}}
