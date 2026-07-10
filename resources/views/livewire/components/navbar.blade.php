@@ -17,28 +17,21 @@
 
             {{-- ══ BRAND ══ --}}
             <a href="/" wire:navigate
-                style="display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0;">
-                <div
-                    style="width: 36px; height: 36px; border-radius: 10px;
-                        background: linear-gradient(135deg, var(--gd-400), var(--gd-500));
-                        display: flex; align-items: center; justify-content: center; font-size: 18px;
-                        box-shadow: 0 0 0 1px rgba(245,158,11,0.3), 0 4px 12px rgba(245,158,11,0.2);">
-                    🕌
-                </div>
-                <div>
+                style="display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0;">
+
+                {{-- Background putih diganti jadi hijau muda (em-100) dengan border emas/hijau tipis --}}
+                <img src="{{ asset('gambar/logo.png') }}" alt="Logo La-Taksal"
+                    style="height: 45px; width: auto; object-fit: contain; background: var(--em-950);"
+                    class="rounded-l-full">
+
+                {{-- Teks Sistem SPP --}}
+                {{-- <div>
                     <div
-                        style="font-family: var(--font-display); font-weight: 900; font-size: 15px;
-                            color: white; letter-spacing: -0.3px; line-height: 1.1;">
-                        La-Taksal
-                    </div>
-                    <div
-                        style="font-size: 9px; color: var(--em-300); letter-spacing: 1.8px;
-                            text-transform: uppercase; font-weight: 500; margin-top: 1px;">
+                        style="font-size: 10px; color: var(--em-300); letter-spacing: 1.8px; text-transform: uppercase; font-weight: 600;">
                         Sistem SPP
                     </div>
-                </div>
+                </div> --}}
             </a>
-
             {{-- ══ DESKTOP NAV ══ --}}
             <ul style="display: flex; align-items: center; gap: 2px; list-style: none;
                    margin: 0; padding: 0;"

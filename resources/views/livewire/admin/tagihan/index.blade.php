@@ -19,6 +19,7 @@
             <h1 class="page-title">Manajemen Tagihan</h1>
             <p class="text-muted mt-1" style="font-size:13px;">Kelola, buat, dan pantau seluruh tagihan SPP santri</p>
         </div>
+
         <div class="flex gap-2 flex-wrap">
             <button wire:click="openGenerate" class="btn btn--secondary">
                 ⚡ Generate Massal
@@ -177,6 +178,17 @@
                                         wire:confirm="Tandai tagihan ini sebagai Lunas?" class="btn"
                                         style="padding:5px 12px; font-size:11px; background:rgba(6,95,70,0.1); color:var(--em-800); border:1px solid rgba(6,95,70,0.2);">
                                         ✓ Lunas
+                                    </button>
+
+                                    {{-- Kirim Email Pengingat --}}
+                                    <button wire:click="kirimPengingatEmail({{ $tagihan->id_tagihan }})"
+                                        wire:loading.attr="disabled" class="btn"
+                                        style="padding:5px 12px; font-size:11px; background:rgba(217,119,6,0.08); color:var(--gd-700); border:1px solid rgba(217,119,6,0.2);">
+                                        <span wire:loading.remove
+                                            wire:target="kirimPengingatEmail({{ $tagihan->id_tagihan }})">📧
+                                            Email</span>
+                                        <span wire:loading
+                                            wire:target="kirimPengingatEmail({{ $tagihan->id_tagihan }})">⏳...</span>
                                     </button>
                                 @endif
 

@@ -58,6 +58,8 @@ Route::middleware(['auth', 'wali_murid'])->group(function () {
     Route::get('wali-murid/tagihan', \App\Livewire\WaliMurid\Tagihan\Index::class)->name('wali-murid.tagihan.index');
     Route::get('wali-murid/tagihan/{tagihanId}', \App\Livewire\WaliMurid\Tagihan\Show::class)->name('wali-murid.tagihan.show');
     Route::get('wali-murid/riwayat/index', \App\Livewire\WaliMurid\Riwayat\Index::class)->name('wali-murid.riwayat.index');
+
+    Route::get('wali-murid/pembayaran/{id}/invoice', [\App\Http\Controllers\InvoiceController::class, 'show'])->name('wali-murid.pembayaran.invoice');
 });
 
 Route::middleware(['auth', 'kepala_sekolah'])->group(function () {

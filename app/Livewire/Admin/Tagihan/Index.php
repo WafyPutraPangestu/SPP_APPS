@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Admin\Tagihan;
 
+use App\Mail\ReminderTagihanMail;
 use App\Models\kategori_spp;
 use App\Models\Siswa;
 use App\Models\Tagihan;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -204,6 +206,28 @@ class Index extends Component
     {
         Tagihan::findOrFail($id)->delete();
         session()->flash('message', 'Tagihan berhasil dihapus.');
+    }
+
+    public function kirimPengingatEmail($id_tagihan)
+    {
+        // 1. Ambil data tagihan beserta relasi email user (wali murid)
+        $tagihan = Tagihan::with(['siswa.user', 'kategori_spp'])->find($id_tagihan);
+
+        if ($tagihan && $tagihan->siswa->user->email) {
+
+            try {
+                // 2. Kirim email
+                Mail::to($tagihan->siswa->user->email)->send(new ReminderTagihanMail($tagihan));
+
+                // 3. Notifikasi sukses
+                $this->dispatch('notify', message: 'Email pengingat berhasil dikirim!', type: 'success');
+            } catch (\Exception $e) {
+                // Jika SMTP error (misal password salah)
+                $this->dispatch('notify', message: 'Gagal kirim email: ' . $e->getMessage(), type: 'error');
+            }
+        } else {
+            $this->dispatch('notify', message: 'Wali murid tidak memiliki email valid.', type: 'error');
+        }
     }
 
     public function render()
