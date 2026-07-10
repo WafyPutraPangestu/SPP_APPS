@@ -20,7 +20,7 @@
                 style="display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0;">
 
                 {{-- Background putih diganti jadi hijau muda (em-100) dengan border emas/hijau tipis --}}
-                <img src="{{ asset('build/gambar/logo.png') }}" alt="Logo La-Taksal"
+                <img src="{{ asset('gambar/logo.png') }}" alt="Logo La-Taksal"
                     style="height: 45px; width: auto; object-fit: contain; background: var(--em-950);"
                     class="rounded-l-full">
 

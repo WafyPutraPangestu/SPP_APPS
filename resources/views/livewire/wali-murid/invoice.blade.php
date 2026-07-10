@@ -457,7 +457,7 @@
                 </p>
                 <div class="invoice-signature">
                     <div class="invoice-signature-line">Mengetahui,</div>
-                    <img src="{{ asset('build/gambar/stempel.png') }}" alt="Stempel" class="invoice-stamp">
+                    <img src="{{ asset('gambar/stempel.png') }}" alt="Stempel" class="invoice-stamp">
                     <div class="invoice-signature-name">Bendahara La-Taksal</div>
                 </div>
             </div>
