@@ -28,22 +28,38 @@
                 {{-- WALI MURID --}}
                 <div style="margin-bottom:18px;">
                     <label class="form-label">Wali Murid</label>
-                    <select wire:model="id_user" class="form-select">
-                        <option value="">-- Pilih Wali Murid --</option>
-                        @foreach ($wali_murid as $wali)
-                            <option value="{{ $wali->id }}">{{ $wali->name }} — {{ $wali->email }}</option>
-                        @endforeach
-                    </select>
+
+                    <!-- Tambahkan style z-index dan position relative pada div ini -->
+                    <div wire:ignore x-data x-init="new TomSelect($refs.selectWali, {
+                        create: false,
+                        placeholder: '-- Pilih Wali Murid --',
+                        onChange: function(value) {
+                            @this.set('id_user', value);
+                        }
+                    });" style="position: relative; z-index: 50;">
+
+                        <select x-ref="selectWali" class="form-select">
+                            <option value="">-- Pilih Wali Murid --</option>
+                            @foreach ($wali_murid as $wali)
+                                <option value="{{ $wali->id }}">{{ $wali->name }} — {{ $wali->email }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Error message tetap di luar wire:ignore agar bisa muncul secara real-time -->
                     @error('id_user')
-                        <span
-                            style="font-size:11px; color:#fca5a5; margin-top:4px; display:block;">{{ $message }}</span>
+                        <span style="font-size:11px; color:#fca5a5; margin-top:4px; display:block;">
+                            {{ $message }}
+                        </span>
                     @enderror
                 </div>
 
                 {{-- NIS --}}
                 <div style="margin-bottom:18px;">
                     <label class="form-label">NIS</label>
-                    <input type="text" wire:model="nis" class="form-input" placeholder="Nomor Induk Siswa">
+                    <input type="text" wire:model="nis" maxlength="12"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-input"
+                        placeholder="Nomor Induk Siswa">
                     @error('nis')
                         <span
                             style="font-size:11px; color:#fca5a5; margin-top:4px; display:block;">{{ $message }}</span>
@@ -81,3 +97,25 @@
     </div>
 
 </div>
+<style>
+    /* Memastikan dropdown Tom Select selalu berada di paling atas */
+    .ts-wrapper .ts-dropdown {
+        z-index: 9999 !important;
+        background-color: #ffffff !important;
+        /* Latar belakang putih solid */
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Mengatur warna teks di dalam dropdown agar kontras */
+    .ts-dropdown .option {
+        color: #1f2937 !important;
+    }
+
+    /* Saat opsi disorot (hover) */
+    .ts-dropdown .active {
+        background-color: #f3f4f6 !important;
+        color: #111827 !important;
+    }
+</style>

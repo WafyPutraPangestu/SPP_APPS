@@ -111,21 +111,33 @@
                     @php
                         $isLunas = $tagihan->status_tagihan === 'Lunas';
                         $hasPending = $tagihan->pembayaran->where('status_pembayaran', 'pending')->isNotEmpty();
+                        $isTerlambat = $tagihan->is_terlambat;
                     @endphp
 
                     <div class="mini-card hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
-                        style="cursor: pointer; position: relative;" wire:key="tagihan-{{ $tagihan->id_tagihan }}">
+                        style="cursor: pointer; position: relative; {{ $isTerlambat && !$isLunas ? 'border: 1px solid rgba(220,38,38,0.4);' : '' }}"
+                        wire:key="tagihan-{{ $tagihan->id_tagihan }}">
 
                         <div class="mini-card__accent"
-                            style="{{ $isLunas ? 'background: linear-gradient(180deg, var(--em-500), var(--em-700));' : 'background: linear-gradient(180deg, var(--gd-400), var(--gd-700));' }}">
+                            style="{{ $isLunas ? 'background: linear-gradient(180deg, var(--em-500), var(--em-700));' : ($isTerlambat ? 'background: linear-gradient(180deg, #ef4444, #991b1b);' : 'background: linear-gradient(180deg, var(--gd-400), var(--gd-700));') }}">
                         </div>
 
                         {{-- STATUS BADGE --}}
                         <div
                             style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; padding-left: 4px;">
-                            <span class="badge {{ $isLunas ? 'badge--lunas' : 'badge--pending' }}">
-                                {{ $tagihan->status_tagihan }}
-                            </span>
+                            <div style="display: flex; gap: 8px;">
+                                <span class="badge {{ $isLunas ? 'badge--lunas' : 'badge--pending' }}">
+                                    {{ $tagihan->status_tagihan }}
+                                </span>
+
+                                {{-- Munculkan peringatan merah jika lewat jatuh tempo --}}
+                                @if ($isTerlambat && !$isLunas)
+                                    <span class="badge"
+                                        style="background: rgba(220,38,38,0.1); color: #dc2626; border: 1px solid rgba(220,38,38,0.2);">
+                                        ⚠️ Terlewat
+                                    </span>
+                                @endif
+                            </div>
                             <span class="label-caps">{{ $tagihan->tahun }}</span>
                         </div>
 

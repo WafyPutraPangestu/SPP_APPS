@@ -5,17 +5,17 @@
     ══════════════════════════════════════════════ --}}
     <section id="hero"
         style="min-height: 100vh; position: relative; display: flex; align-items: center;
-               background: var(--em-950); overflow: hidden;">
+           background: var(--em-950) url('{{ asset('gambar/sekolah.jpeg') }}') center center / cover no-repeat fixed;
+           overflow: hidden;">
 
         {{-- Animated geometric background --}}
         <canvas id="geometricCanvas"
-            style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.18; pointer-events: none;"></canvas>
-
+            style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.18; pointer-events: none; z-index: 2;"></canvas>
         {{-- Radial glows --}}
         <div
-            style="position: absolute; top: -100px; left: -100px; width: 500px; height: 500px;
-                    background: radial-gradient(circle, rgba(16,185,129,0.25) 0%, transparent 65%);
-                    border-radius: 50%; pointer-events: none; animation: driftA 12s ease-in-out infinite alternate;">
+            style="position: absolute; inset: 0;
+                background: linear-gradient(135deg, rgba(2,44,34,0.75) 0%, rgba(6,78,59,0.65) 45%, rgba(2,44,34,0.8) 100%);
+                pointer-events: none; z-index: 1;">
         </div>
         <div
             style="position: absolute; bottom: -80px; right: -80px; width: 600px; height: 600px;

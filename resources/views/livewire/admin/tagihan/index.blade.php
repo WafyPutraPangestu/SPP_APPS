@@ -165,6 +165,14 @@
                                 <span class="badge badge--lunas">Lunas</span>
                             @else
                                 <span class="badge badge--pending">Belum Lunas</span>
+
+                                {{-- Tambahan Indikator Terlambat untuk Admin --}}
+                                @if ($tagihan->is_terlambat)
+                                    <div
+                                        style="font-size:11px; color:#dc2626; margin-top:6px; display:flex; align-items:center; gap:4px; font-weight:500;">
+                                        ⚠️ Lewat Jatuh Tempo
+                                    </div>
+                                @endif
                             @endif
                         </td>
 

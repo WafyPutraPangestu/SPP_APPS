@@ -21,9 +21,10 @@ class Edit extends Component
 
     public function update()
     {
+        $this->nominal_spp = str_replace('.', '', $this->nominal_spp);
         $this->validate([
             'tahun_ajaran' => 'required|string|max:20',
-            'nominal_spp' => 'required|numeric|min:0',
+            'nominal_spp' => 'required|numeric|min:0|max:1000000000',
         ]);
 
         $this->kategori->update([

@@ -27,8 +27,9 @@
 
                 {{-- TAHUN AJARAN --}}
                 <div style="margin-bottom:18px;">
-                    <label class="form-label">Tahun Ajaran</label>
-                    <input type="text" wire:model="tahun_ajaran" class="form-input" placeholder="Contoh: 2024/2025">
+                    <label class="form-label">Tagihan & Tahun Ajaran</label>
+                    <input type="text" wire:model="tahun_ajaran" class="form-input"
+                        placeholder="Contoh: SPP (2024/2025)">
                     @error('tahun_ajaran')
                         <span
                             style="font-size:11px; color:#fca5a5; margin-top:4px; display:block;">{{ $message }}</span>
@@ -41,8 +42,8 @@
                     <div style="position:relative;">
                         <span
                             style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:rgba(255,255,255,0.4); font-size:13px; font-family:var(--font-mono);">Rp</span>
-                        <input type="number" wire:model="nominal_spp" class="form-input" placeholder="0"
-                            style="padding-left:40px;" min="0">
+                        <input id="nominal_spp" type="text" wire:model="nominal_spp" class="form-input"
+                            placeholder="0" style="padding-left:40px;" min="0">
                     </div>
                     @if (!empty($nominal_spp) && is_numeric($nominal_spp))
                         <div style="font-size:11px; color:var(--gd-300); margin-top:5px; font-family:var(--font-mono);">
@@ -66,3 +67,18 @@
     </div>
 
 </div>
+<script>
+    const inputSpp = document.getElementById('nominal_spp');
+
+    inputSpp.addEventListener('input', function(e) {
+        // 1. Hapus semua karakter yang bukan angka (termasuk titik yang sudah ada)
+        let rawValue = this.value.replace(/[^0-9]/g, '');
+
+        // 2. Format kembali menjadi format ribuan standar Indonesia (id-ID)
+        if (rawValue !== '') {
+            this.value = parseInt(rawValue, 10).toLocaleString('id-ID');
+        } else {
+            this.value = '';
+        }
+    });
+</script>

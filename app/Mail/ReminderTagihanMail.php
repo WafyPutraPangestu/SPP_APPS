@@ -20,7 +20,12 @@ class ReminderTagihanMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Pengingat SPP - Ponpes La-Taksal')
+        // Jika terlambat, subjeknya "Peringatan", jika tidak subjeknya "Pengingat"
+        $subjectText = $this->tagihan->is_terlambat
+            ? '⚠️ PERINGATAN: SPP Terlambat - Ponpes La-Taksal'
+            : 'Pengingat SPP - Ponpes La-Taksal';
+
+        return $this->subject($subjectText)
             ->view('emails.reminder');
     }
 }
