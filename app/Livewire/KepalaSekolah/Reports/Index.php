@@ -41,6 +41,7 @@ class Index extends Component
         $this->resetPage();
     }
 
+
     public function render()
     {
         $now      = now();

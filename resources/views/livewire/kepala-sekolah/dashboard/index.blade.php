@@ -111,7 +111,7 @@
         ═══════════════════════════════════════ --}}
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-            {{-- BAR CHART 6 BULAN --}}
+            {{-- LINE CHART 6 BULAN --}}
             <div class="table-card lg:col-span-3" style="padding: 24px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
                     <div class="section-title">Tren Pemasukan 6 Bulan</div>
@@ -120,34 +120,102 @@
 
                 @php
                     $maxVal = $chartData->max('nominal') ?: 1;
+                    $chartCount = $chartData->count();
+                    $svgW = 500;
+                    $svgH = 160;
+                    $padX = 30;
+                    $padT = 20;
+                    $padB = 30;
+                    $plotW = $svgW - $padX * 2;
+                    $plotH = $svgH - $padT - $padB;
+
+                    $points = [];
+                    foreach ($chartData->values() as $i => $item) {
+                        $x = $chartCount > 1
+                            ? $padX + ($i / ($chartCount - 1)) * $plotW
+                            : $padX + $plotW / 2;
+                        $y = $maxVal > 0
+                            ? $padT + $plotH - ($item['nominal'] / $maxVal) * $plotH
+                            : $padT + $plotH;
+                        $points[] = ['x' => round($x, 1), 'y' => round($y, 1), 'nominal' => $item['nominal'], 'label' => $item['label']];
+                    }
+
+                    $linePoints = collect($points)->map(fn($p) => $p['x'] . ',' . $p['y'])->implode(' ');
+                    $areaPoints = $linePoints
+                        . ' ' . $points[count($points) - 1]['x'] . ',' . ($padT + $plotH)
+                        . ' ' . $points[0]['x'] . ',' . ($padT + $plotH);
                 @endphp
 
-                <div style="display: flex; align-items: flex-end; gap: 10px; height: 160px;">
-                    @foreach ($chartData as $item)
-                        @php $height = $maxVal > 0 ? round(($item['nominal'] / $maxVal) * 100) : 0; @endphp
-                        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%;"
-                            x-data="{ tip: false }" @mouseenter="tip = true" @mouseleave="tip = false"
-                            style="position: relative;">
+                <div x-data="{ activePoint: null }" style="position: relative;">
+                    <svg viewBox="0 0 {{ $svgW }} {{ $svgH }}" style="width: 100%; height: auto; overflow: visible;">
+                        {{-- Grid lines --}}
+                        @for ($g = 0; $g <= 4; $g++)
+                            @php $gy = $padT + ($g / 4) * $plotH; @endphp
+                            <line x1="{{ $padX }}" y1="{{ round($gy, 1) }}" x2="{{ $svgW - $padX }}" y2="{{ round($gy, 1) }}"
+                                stroke="rgba(0,0,0,0.06)" stroke-width="1" stroke-dasharray="4,3" />
+                        @endfor
 
-                            {{-- Tooltip --}}
-                            <div x-show="tip"
-                                style="position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
-                                        background: var(--em-900); color: white; border-radius: var(--r-sm);
-                                        padding: 5px 10px; font-size: 11px; white-space: nowrap; margin-bottom: 6px;
-                                        border: 1px solid rgba(16,185,129,0.2); z-index: 10;
-                                        box-shadow: 0 4px 12px rgba(0,0,0,0.2); pointer-events: none;">
-                                Rp {{ number_format($item['nominal'], 0, ',', '.') }}
-                            </div>
+                        {{-- Area fill --}}
+                        <polygon points="{{ $areaPoints }}"
+                            fill="url(#areaGradient)" opacity="0.3" />
 
-                            <div style="flex: 1; width: 100%; display: flex; align-items: flex-end;">
-                                <div style="width: 100%; height: {{ $height }}%; min-height: 4px;
-                                            background: {{ $item['nominal'] > 0 ? 'linear-gradient(180deg, var(--em-500), var(--em-800))' : 'rgba(0,0,0,0.06)' }};
-                                            border-radius: 6px 6px 0 0; transition: opacity 0.2s; cursor: pointer;"
-                                    onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                                </div>
-                            </div>
-                            <div style="font-size: 11px; color: var(--ink-muted); font-weight: 500;">
-                                {{ $item['label'] }}
+                        {{-- Line --}}
+                        <polyline points="{{ $linePoints }}"
+                            fill="none" stroke="var(--em-700)" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round" />
+
+                        {{-- Dots + invisible hover zones --}}
+                        @foreach ($points as $idx => $pt)
+                            {{-- Hover zone (invisible, wider) --}}
+                            <circle cx="{{ $pt['x'] }}" cy="{{ $pt['y'] }}" r="14"
+                                fill="transparent" style="cursor: pointer;"
+                                @mouseenter="activePoint = {{ $idx }}"
+                                @mouseleave="activePoint = null" />
+
+                            {{-- Outer glow --}}
+                            <circle cx="{{ $pt['x'] }}" cy="{{ $pt['y'] }}" r="6"
+                                fill="var(--em-700)" opacity="0.15"
+                                x-show="activePoint === {{ $idx }}"
+                                x-transition />
+
+                            {{-- Dot --}}
+                            <circle cx="{{ $pt['x'] }}" cy="{{ $pt['y'] }}" r="3.5"
+                                fill="white" stroke="var(--em-700)" stroke-width="2"
+                                style="cursor: pointer; transition: r 0.2s;"
+                                @mouseenter="activePoint = {{ $idx }}"
+                                @mouseleave="activePoint = null" />
+                        @endforeach
+
+                        {{-- Labels --}}
+                        @foreach ($points as $pt)
+                            <text x="{{ $pt['x'] }}" y="{{ $svgH - 6 }}"
+                                text-anchor="middle" fill="var(--ink-muted)"
+                                style="font-size: 11px; font-weight: 500; font-family: var(--font-body);">
+                                {{ $pt['label'] }}
+                            </text>
+                        @endforeach
+
+                        {{-- Gradient definition --}}
+                        <defs>
+                            <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="var(--em-700)" stop-opacity="0.4" />
+                                <stop offset="100%" stop-color="var(--em-700)" stop-opacity="0.02" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+
+                    {{-- Tooltip overlays --}}
+                    @foreach ($points as $idx => $pt)
+                        <div x-show="activePoint === {{ $idx }}" x-transition.opacity
+                            style="position: absolute; pointer-events: none; z-index: 10;
+                                   left: {{ round(($pt['x'] / $svgW) * 100, 1) }}%;
+                                   top: {{ round(($pt['y'] / $svgH) * 100, 1) }}%;
+                                   transform: translate(-50%, -130%);">
+                            <div style="background: var(--em-900); color: white; border-radius: var(--r-sm);
+                                        padding: 5px 10px; font-size: 11px; white-space: nowrap;
+                                        border: 1px solid rgba(16,185,129,0.2);
+                                        box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
+                                Rp {{ number_format($pt['nominal'], 0, ',', '.') }}
                             </div>
                         </div>
                     @endforeach

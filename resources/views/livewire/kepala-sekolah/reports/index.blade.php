@@ -86,9 +86,35 @@
                 </button>
             @endif
 
-            <div style="margin-left: auto;">
+
+            <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+                <a href="{{ route('kepala-sekolah.reports.export', [
+                        'bulan' => $filterBulan,
+                        'tahun' => $filterTahun,
+                        'kelas' => $filterKelas,
+                        'kategori' => $filterKategori,
+                        'status' => $filterStatus,
+                    ]) }}"
+                    style="display: flex; align-items: center; gap: 6px; padding: 8px 16px;
+                           background: var(--em-700); color: white; border: none; border-radius: var(--r-sm);
+                           font-family: var(--font-body); font-size: 12.5px; font-weight: 600;
+                           cursor: pointer; transition: all 0.2s; white-space: nowrap;
+                           box-shadow: 0 2px 8px rgba(6,95,70,0.25); text-decoration: none;"
+                    onmouseover="this.style.background='var(--em-800)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(6,95,70,0.35)'"
+                    onmouseout="this.style.background='var(--em-700)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(6,95,70,0.25)'"
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    Export Excel
+                </a>
+
                 <div wire:loading
-                    style="display: flex; align-items: center; gap: 6px;
+                    style="display: none; align-items: center; gap: 6px;
                                          font-size: 12px; color: var(--em-700);">
                     <div
                         style="width: 14px; height: 14px; border: 2px solid var(--em-300);
