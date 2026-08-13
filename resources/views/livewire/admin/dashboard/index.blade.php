@@ -111,53 +111,123 @@
                     per bulan</p>
             </div>
             <div style="padding:20px 24px;">
-                @php $maxVal = $rekapBulan->max(fn($r) => $r['lunas'] + $r['belum']) ?: 1; @endphp
-                <div style="display:flex; align-items:flex-end; gap:6px; height:140px; margin-bottom:8px;">
-                    @foreach ($rekapBulan as $r)
-                        @php
-                            $total = $r['lunas'] + $r['belum'];
-                            $hTotal = $total > 0 ? round(($total / $maxVal) * 120) : 0;
-                            $hLunas = $total > 0 ? round(($r['lunas'] / $total) * $hTotal) : 0;
-                            $hBelum = $hTotal - $hLunas;
-                        @endphp
-                        <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;"
-                            title="{{ $r['bulan'] }}: {{ $r['lunas'] }} lunas, {{ $r['belum'] }} belum">
-                            @if ($hBelum > 0)
-                                <div
-                                    style="width:100%; height:{{ $hBelum }}px; background:rgba(217,119,6,0.35); border-radius:3px 3px 0 0;">
-                                </div>
-                            @endif
-                            @if ($hLunas > 0)
-                                <div
-                                    style="width:100%; height:{{ $hLunas }}px; background:linear-gradient(180deg, var(--em-500), var(--em-700)); border-radius:{{ $hBelum > 0 ? '0' : '3px 3px 0 0' }};">
-                                </div>
-                            @endif
-                            @if ($hTotal === 0)
-                                <div
-                                    style="width:100%; height:4px; background:rgba(0,0,0,0.06); border-radius:3px; margin-top:auto;">
-                                </div>
-                            @endif
+                @php
+                    $maxVal = $rekapBulan->max(fn($r) => max($r['lunas'], $r['belum'])) ?: 1;
+                    $chartCount = $rekapBulan->count();
+                    $svgW = 600;
+                    $svgH = 160;
+                    $padX = 20;
+                    $padT = 10;
+                    $padB = 25;
+                    $plotW = $svgW - $padX * 2;
+                    $plotH = $svgH - $padT - $padB;
+
+                    $pointsLunas = [];
+                    $pointsBelum = [];
+                    foreach ($rekapBulan->values() as $i => $r) {
+                        $x = $chartCount > 1 ? $padX + ($i / ($chartCount - 1)) * $plotW : $padX + $plotW / 2;
+                        $yLunas = $maxVal > 0 ? $padT + $plotH - ($r['lunas'] / $maxVal) * $plotH : $padT + $plotH;
+                        $yBelum = $maxVal > 0 ? $padT + $plotH - ($r['belum'] / $maxVal) * $plotH : $padT + $plotH;
+                        
+                        $pointsLunas[] = ['x' => round($x, 1), 'y' => round($yLunas, 1), 'val' => $r['lunas'], 'label' => strtoupper(substr($r['bulan'], 0, 3))];
+                        $pointsBelum[] = ['x' => round($x, 1), 'y' => round($yBelum, 1), 'val' => $r['belum'], 'label' => strtoupper(substr($r['bulan'], 0, 3))];
+                    }
+
+                    $lineLunas = collect($pointsLunas)->map(fn($p) => $p['x'] . ',' . $p['y'])->implode(' ');
+                    $lineBelum = collect($pointsBelum)->map(fn($p) => $p['x'] . ',' . $p['y'])->implode(' ');
+                    
+                    $areaLunas = $lineLunas 
+                        . ' ' . $pointsLunas[count($pointsLunas) - 1]['x'] . ',' . ($padT + $plotH)
+                        . ' ' . $pointsLunas[0]['x'] . ',' . ($padT + $plotH);
+                @endphp
+
+                <div x-data="{ activePoint: null }" style="position: relative;">
+                    <svg viewBox="0 0 {{ $svgW }} {{ $svgH }}" style="width: 100%; height: auto; overflow: visible;">
+                        {{-- Grid lines --}}
+                        @for ($g = 0; $g <= 4; $g++)
+                            @php $gy = $padT + ($g / 4) * $plotH; @endphp
+                            <line x1="{{ $padX }}" y1="{{ round($gy, 1) }}" x2="{{ $svgW - $padX }}" y2="{{ round($gy, 1) }}"
+                                stroke="rgba(0,0,0,0.06)" stroke-width="1" stroke-dasharray="4,3" />
+                        @endfor
+
+                        {{-- Area fill Lunas --}}
+                        <polygon points="{{ $areaLunas }}" fill="url(#areaLunasGradient)" opacity="1" />
+
+                        {{-- Line Lunas --}}
+                        <polyline points="{{ $lineLunas }}" fill="none" stroke="#10b981" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+                        
+                        {{-- Line Belum --}}
+                        <polyline points="{{ $lineBelum }}" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,5" />
+
+                        {{-- Points and Hover Zones --}}
+                        @foreach ($pointsLunas as $idx => $pt)
+                            {{-- Lunas --}}
+                            <circle cx="{{ $pt['x'] }}" cy="{{ $pt['y'] }}" r="12" fill="transparent" style="cursor: pointer;"
+                                @mouseenter="activePoint = 'lunas_{{ $idx }}'" @mouseleave="activePoint = null" />
+                            <circle cx="{{ $pt['x'] }}" cy="{{ $pt['y'] }}" r="4" fill="white" stroke="#10b981" stroke-width="2.5" />
+                        @endforeach
+                        @foreach ($pointsBelum as $idx => $pt)
+                            {{-- Belum --}}
+                            <circle cx="{{ $pt['x'] }}" cy="{{ $pt['y'] }}" r="12" fill="transparent" style="cursor: pointer;"
+                                @mouseenter="activePoint = 'belum_{{ $idx }}'" @mouseleave="activePoint = null" />
+                            <circle cx="{{ $pt['x'] }}" cy="{{ $pt['y'] }}" r="3.5" fill="white" stroke="#f59e0b" stroke-width="2" />
+                        @endforeach
+
+                        {{-- Labels --}}
+                        @foreach ($pointsLunas as $pt)
+                            <text x="{{ $pt['x'] }}" y="{{ $svgH - 2 }}" text-anchor="middle" fill="var(--ink-muted)"
+                                style="font-size: 11px; font-weight: 600; font-family: var(--font-body);">
+                                {{ $pt['label'] }}
+                            </text>
+                        @endforeach
+
+                        <defs>
+                            <linearGradient id="areaLunasGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#10b981" stop-opacity="0.4" />
+                                <stop offset="100%" stop-color="#10b981" stop-opacity="0.01" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+
+                    {{-- Tooltips Lunas --}}
+                    @foreach ($pointsLunas as $idx => $pt)
+                        <div x-show="activePoint === 'lunas_{{ $idx }}'" x-transition.opacity
+                            style="position: absolute; pointer-events: none; z-index: 10;
+                                   left: {{ round(($pt['x'] / $svgW) * 100, 1) }}%;
+                                   top: {{ round(($pt['y'] / $svgH) * 100, 1) }}%;
+                                   transform: translate(-50%, -140%);">
+                            <div style="background: #064e3b; color: white; border-radius: var(--r-sm);
+                                        padding: 5px 10px; font-size: 11px; white-space: nowrap; font-weight: 600;
+                                        box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
+                                Lunas: {{ $pt['val'] }}
+                            </div>
+                        </div>
+                    @endforeach
+
+                    {{-- Tooltips Belum --}}
+                    @foreach ($pointsBelum as $idx => $pt)
+                        <div x-show="activePoint === 'belum_{{ $idx }}'" x-transition.opacity
+                            style="position: absolute; pointer-events: none; z-index: 10;
+                                   left: {{ round(($pt['x'] / $svgW) * 100, 1) }}%;
+                                   top: {{ round(($pt['y'] / $svgH) * 100, 1) }}%;
+                                   transform: translate(-50%, -140%);">
+                            <div style="background: #78350f; color: white; border-radius: var(--r-sm);
+                                        padding: 5px 10px; font-size: 11px; white-space: nowrap; font-weight: 600;
+                                        box-shadow: 0 4px 12px rgba(245,158,11,0.3);">
+                                Belum: {{ $pt['val'] }}
+                            </div>
                         </div>
                     @endforeach
                 </div>
-                <div style="display:flex; gap:6px;">
-                    @foreach ($rekapBulan as $r)
-                        <div
-                            style="flex:1; text-align:center; font-size:9px; color:var(--ink-muted); font-weight:600; letter-spacing:0.5px;">
-                            {{ strtoupper(substr($r['bulan'], 0, 3)) }}
-                        </div>
-                    @endforeach
-                </div>
-                <div style="display:flex; gap:16px; margin-top:16px;">
+
+                <div style="display:flex; gap:16px; margin-top:20px; justify-content: center;">
                     <div style="display:flex; align-items:center; gap:6px;">
-                        <div
-                            style="width:10px; height:10px; border-radius:2px; background:linear-gradient(180deg, var(--em-500), var(--em-700));">
-                        </div>
-                        <span style="font-size:11px; color:var(--ink-muted);">Lunas</span>
+                        <div style="width:14px; height:4px; background:#10b981; border-radius:2px;"></div>
+                        <span style="font-size:12px; font-weight: 600; color:var(--ink-muted);">Lunas</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:6px;">
-                        <div style="width:10px; height:10px; border-radius:2px; background:rgba(217,119,6,0.5);"></div>
-                        <span style="font-size:11px; color:var(--ink-muted);">Belum Lunas</span>
+                        <div style="width:14px; height:4px; background:#f59e0b; border-radius:2px;"></div>
+                        <span style="font-size:12px; font-weight: 600; color:var(--ink-muted);">Belum Lunas</span>
                     </div>
                 </div>
             </div>
