@@ -36,12 +36,14 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/users', Index::class)->name('users.index');
         Route::get('/users/create', Create::class)->name('users.create');
         Route::get('/users/export', [\App\Http\Controllers\ExportLaporanController::class, 'exportWaliMurid'])->name('users.export');
+        Route::get('/users/{user}/export-tagihan', [\App\Http\Controllers\ExportLaporanController::class, 'exportTagihanWaliMurid'])->name('users.export-tagihan');
         Route::get('/users/{user}/edit', Edit::class)->name('users.edit');
         Route::get('/users/{user}', Show::class)->name('users.show');
 
         Route::get('/siswa', SiswaIndex::class)->name('siswa.index');
         Route::get('/siswa/create', SiswaCreate::class)->name('siswa.create');
         Route::get('/siswa/export', [\App\Http\Controllers\ExportLaporanController::class, 'exportSiswa'])->name('siswa.export');
+        Route::get('/siswa/{siswa}/export-tagihan', [\App\Http\Controllers\ExportLaporanController::class, 'exportTagihanSiswa'])->name('siswa.export-tagihan');
         Route::get('/siswa/{siswa}/edit', SiswaEdit::class)->name('siswa.edit');
         Route::get('/siswa/{siswa}', SiswaShow::class)->name('siswa.show');
 

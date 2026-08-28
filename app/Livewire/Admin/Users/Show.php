@@ -10,7 +10,7 @@ class Show extends Component
     public User $user;
     public function mount(User $user)
     {
-        $this->user = $user->load('siswa');
+        $this->user = $user->load(['siswa.tagihan']);
     }
     public function render()
     {

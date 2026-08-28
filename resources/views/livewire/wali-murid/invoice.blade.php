@@ -283,9 +283,9 @@
         /* Stempel, ditumpuk di atas garis tanda tangan */
         .invoice-stamp {
             position: absolute;
-            width: 108px;
+            width: 130px;
             height: auto;
-            top: -8px;
+            top: -55px;
             left: 50%;
             transform: translateX(-50%) rotate(-6deg);
             opacity: 0.9;
@@ -369,19 +369,18 @@
 
             <div class="invoice-watermark">LUNAS</div>
 
-            {{-- HEADER --}}
-            <div class="invoice-header">
-                <div class="invoice-brand">
-                    <div class="invoice-brand-icon">🕌</div>
-                    <div>
-                        <div class="invoice-brand-name">Ponpes La-Taksal</div>
-                        <div class="invoice-brand-address">Jl. Panongan, Banten, Indonesia</div>
-                    </div>
+            {{-- HEADER KOP SURAT --}}
+            <div style="text-align: center; padding-bottom: 2px; margin-bottom: 24px; position: relative; z-index: 2;">
+                <img src="{{ asset('gambar/KOP-SURAT.png') }}" alt="Kop Surat Ponpes La-Taksal" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto;">
+            </div>
+
+            <div class="invoice-header" style="border-bottom: none; padding-bottom: 0; align-items: flex-end;">
+                <div>
+                    <div class="invoice-meta-title">BUKTI PEMBAYARAN SPP</div>
+                    <span class="badge badge--lunas">Lunas</span>
                 </div>
 
                 <div class="invoice-meta">
-                    <div class="invoice-meta-title">INVOICE</div>
-                    <span class="badge badge--lunas">Lunas</span>
                     <div class="invoice-meta-row">
                         Order ID<br>
                         <span class="invoice-meta-value">{{ $pembayaran->order_id }}</span>

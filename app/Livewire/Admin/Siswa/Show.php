@@ -11,7 +11,7 @@ class Show extends Component
 
     public function mount(Siswa $siswa)
     {
-        $this->siswa = $siswa->load('user');
+        $this->siswa = $siswa->load(['user', 'tagihan.kategori_spp']);
     }
 
     public function render()

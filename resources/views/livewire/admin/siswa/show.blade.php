@@ -72,16 +72,26 @@
                         <div class="section-title">Riwayat Tagihan</div>
                         <p class="text-muted" style="font-size:12px; margin-top:2px;">Seluruh tagihan SPP santri ini</p>
                     </div>
-                    @php
-                        $tagihanLunas = $siswa->tagihan->where('status_tagihan', 'Lunas')->count();
-                        $tagihanTotal = $siswa->tagihan->count();
-                    @endphp
-                    @if ($tagihanTotal > 0)
-                        <span
-                            class="{{ $tagihanLunas === $tagihanTotal ? 'badge badge--lunas' : 'badge badge--pending' }}">
-                            {{ $tagihanLunas }}/{{ $tagihanTotal }} Lunas
-                        </span>
-                    @endif
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        @php
+                            $tagihanLunas = $siswa->tagihan->where('status_tagihan', 'Lunas')->count();
+                            $tagihanTotal = $siswa->tagihan->count();
+                        @endphp
+                        @if ($tagihanTotal > 0)
+                            <span
+                                class="{{ $tagihanLunas === $tagihanTotal ? 'badge badge--lunas' : 'badge badge--pending' }}">
+                                {{ $tagihanLunas }}/{{ $tagihanTotal }} Lunas
+                            </span>
+                        @endif
+                        <a href="{{ route('admin.siswa.export-tagihan', $siswa->id_siswa) }}"
+                            class="btn btn--primary"
+                            style="font-size:12px; padding:6px 14px; display:inline-flex; align-items:center; gap:6px; text-decoration:none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                            </svg>
+                            Export Excel
+                        </a>
+                    </div>
                 </div>
 
                 @if ($siswa->tagihan->isEmpty())

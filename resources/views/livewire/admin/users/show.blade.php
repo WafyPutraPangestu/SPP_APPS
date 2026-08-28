@@ -59,11 +59,23 @@
         {{-- SISWA LIST --}}
         <div style="grid-column: span 2;">
             <div class="table-card">
-                <div style="padding:20px 20px 14px; border-bottom:1px solid rgba(0,0,0,0.05);">
-                    <div class="section-title">Daftar Siswa</div>
-                    <p class="text-muted" style="font-size:12px; margin-top:2px;">
-                        Siswa yang terhubung dengan akun ini
-                    </p>
+                <div style="padding:20px 20px 14px; border-bottom:1px solid rgba(0,0,0,0.05); display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                        <div class="section-title">Daftar Siswa</div>
+                        <p class="text-muted" style="font-size:12px; margin-top:2px;">
+                            Siswa yang terhubung dengan akun ini
+                        </p>
+                    </div>
+                    @if ($user->siswa->isNotEmpty())
+                        <a href="{{ route('admin.users.export-tagihan', $user->id) }}"
+                            class="btn btn--primary"
+                            style="font-size:12px; padding:6px 14px; display:inline-flex; align-items:center; gap:6px; text-decoration:none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                            </svg>
+                            Export Excel
+                        </a>
+                    @endif
                 </div>
 
                 @if ($user->siswa->isEmpty())
