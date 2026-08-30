@@ -7,6 +7,8 @@ use App\Livewire\Admin\Users\Edit;
 use App\Livewire\Admin\Users\Index;
 use App\Livewire\Admin\Users\Show;
 use App\Livewire\Auth\Login;
+use App\Livewire\Auth\ForgotPassword;
+use App\Livewire\Auth\ResetPassword;
 use App\Livewire\Home;
 use App\Livewire\Admin\Tagihan\Index as TagihanIndex;
 
@@ -28,6 +30,8 @@ Route::post('/midtrans/callback', [MidtransCallbackController::class, 'handle'])
     ->name('midtrans.callback');
 Route::middleware(['guest'])->group(function () {
     Route::get('/login', Login::class)->name('login');
+    Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
+    Route::get('/reset-password/{token}', ResetPassword::class)->name('password.reset');
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
