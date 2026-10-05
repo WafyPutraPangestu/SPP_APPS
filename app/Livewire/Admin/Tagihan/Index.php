@@ -208,6 +208,24 @@ class Index extends Component
         session()->flash('message', 'Tagihan berhasil dihapus.');
     }
 
+    // ── Simulasi Telat ──────────────────────────────
+    public function simulateLate($id)
+    {
+        $tagihan = Tagihan::findOrFail($id);
+        $tagihan->update(['is_force_late' => true]);
+        session()->flash('message', 'Tagihan berhasil ditandai sebagai terlambat.');
+    }
+
+    // ── Tandai Semua Telat ─────────────────────────
+    public function tandaiSemuaTelat()
+    {
+        $count = Tagihan::where('status_tagihan', 'Belum Lunas')
+            ->where('is_force_late', false)
+            ->update(['is_force_late' => true]);
+
+        session()->flash('message', $count . ' tagihan berhasil ditandai sebagai terlambat.');
+    }
+
     public function kirimPengingatEmail($id_tagihan)
     {
         // 1. Ambil data tagihan beserta relasi email user (wali murid)
@@ -237,7 +255,10 @@ class Index extends Component
             ->when($this->filterKategori, fn($q) => $q->where('id_kategori', $this->filterKategori))
             ->when($this->filterBulan,    fn($q) => $q->where('bulan', $this->filterBulan))
             ->when($this->filterTahun,    fn($q) => $q->where('tahun', $this->filterTahun))
-            ->latest();
+            ->orderBy('status_tagihan', 'asc')
+            ->orderBy('tahun', 'desc')
+            ->orderByRaw("FIELD(bulan, 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember') DESC")
+            ->latest('id_tagihan');
 
         /** @disregard P1005 */
         return view('livewire.admin.tagihan.index', [

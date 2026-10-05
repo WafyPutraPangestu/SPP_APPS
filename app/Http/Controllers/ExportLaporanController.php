@@ -358,4 +358,91 @@ class ExportLaporanController extends Controller
             ]
         );
     }
+    /**
+     * Export Data Manajemen Tagihan (admin) dengan filter aktif.
+     * Template: file-excel-revisi/Data-Manajemen-Tagihan.xlsx
+     */
+    public function exportTagihanAdmin(Request $request): StreamedResponse
+    {
+        $tagihans = Tagihan::with(['siswa', 'kategori_spp'])
+            ->when($request->status,   fn($q) => $q->where('status_tagihan', $request->status))
+            ->when($request->kategori, fn($q) => $q->where('id_kategori', $request->kategori))
+            ->when($request->bulan,    fn($q) => $q->where('bulan', $request->bulan))
+            ->when($request->tahun,    fn($q) => $q->where('tahun', $request->tahun))
+            ->orderBy('status_tagihan', 'asc')
+            ->orderBy('tahun', 'desc')
+            ->orderByRaw("FIELD(bulan,'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember') DESC")
+            ->latest('id_tagihan')
+            ->get();
+
+        // ── 1. Buka template Excel ─────────────────────────────
+        $templatePath = base_path('file-excel-revisi/Data-Manajemen-Tagihan.xlsx');
+        $spreadsheet  = IOFactory::load($templatePath);
+        $sheet        = $spreadsheet->getActiveSheet();
+
+        // ── 2. Tulis info filter & waktu cetak ────────────────
+        $filterTexts = [];
+        if ($request->status)   $filterTexts[] = 'Status: '   . $request->status;
+        if ($request->bulan)    $filterTexts[] = 'Bulan: '    . $request->bulan;
+        if ($request->tahun)    $filterTexts[] = 'Tahun: '    . $request->tahun;
+        $filterStr = !empty($filterTexts)
+            ? 'Filter: ' . implode(' | ', $filterTexts)
+            : 'Semua Data';
+
+        $sheet->setCellValue('B5', 'Waktu Cetak: ' . now()->format('d/m/Y H:i') . '  •  ' . $filterStr);
+        $sheet->getStyle('B5')->applyFromArray([
+            'font'      => ['italic' => true, 'size' => 10, 'color' => ['argb' => 'FF555555']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT],
+        ]);
+        $sheet->getRowDimension(5)->setRowHeight(20);
+
+        // ── 3. Isi data mulai row 8 ───────────────────────────
+        $startRow       = 8;
+        $templateEndRow = 23;
+
+        foreach ($tagihans as $i => $t) {
+            $row = $startRow + $i;
+
+            // Jika melebihi baris template → salin merge & style
+            if ($row > $templateEndRow) {
+                $prevRow = $row - 1;
+                $sheet->mergeCells("B{$row}:C{$row}");
+                $sheet->mergeCells("D{$row}:F{$row}");
+                $sheet->mergeCells("G{$row}:H{$row}");
+                $sheet->mergeCells("I{$row}:J{$row}");
+                $sheet->mergeCells("K{$row}:L{$row}");
+                $sheet->mergeCells("M{$row}:N{$row}");
+                $sheet->mergeCells("O{$row}:P{$row}");
+                foreach (['A','B','D','G','I','K','M','O'] as $col) {
+                    $sheet->duplicateStyle(
+                        $sheet->getStyle("{$col}{$prevRow}"),
+                        "{$col}{$row}"
+                    );
+                }
+            }
+
+            $sheet->setCellValue("A{$row}", $i + 1);
+            $sheet->setCellValue("B{$row}", $t->siswa->nama_siswa ?? '-');
+            $sheet->setCellValue("D{$row}", $t->siswa->nis ?? '-');
+            $sheet->setCellValue("G{$row}", $t->siswa->kelas ?? '-');
+            $sheet->setCellValue("I{$row}", $t->bulan . ' ' . $t->tahun);
+            $sheet->setCellValue("K{$row}", $t->kategori_spp->nominal_spp ?? 0);
+            $sheet->setCellValue("M{$row}", $t->status_tagihan);
+            $sheet->setCellValue("O{$row}", $t->kategori_spp->tahun_ajaran ?? '-');
+        }
+
+        // ── 4. Stream download ─────────────────────────────────
+        $namaFile = 'Data_Manajemen_Tagihan_' . now()->format('Ymd_His') . '.xlsx';
+        $writer   = new Xlsx($spreadsheet);
+
+        return response()->streamDownload(
+            fn() => $writer->save('php://output'),
+            $namaFile,
+            [
+                'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="' . $namaFile . '"',
+                'Cache-Control'       => 'max-age=0',
+            ]
+        );
+    }
 }

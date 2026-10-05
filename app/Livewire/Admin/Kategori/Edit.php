@@ -23,7 +23,7 @@ class Edit extends Component
     {
         $this->nominal_spp = str_replace('.', '', $this->nominal_spp);
         $this->validate([
-            'tahun_ajaran' => 'required|string|max:20',
+            'tahun_ajaran' => 'required|string|max:40',
             'nominal_spp' => 'required|numeric|min:0|max:1000000000',
         ]);
 

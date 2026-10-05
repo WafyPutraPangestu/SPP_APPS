@@ -18,7 +18,7 @@ class Create extends Component
 
         // 2. Validasi input: tahun ajaran wajib diisi, nominal harus berupa angka
         $this->validate([
-            'tahun_ajaran' => 'required|string|max:20',
+            'tahun_ajaran' => 'required|string|max:40',
             'nominal_spp' => 'required|numeric|min:0|max:1000000000',
         ]);
 

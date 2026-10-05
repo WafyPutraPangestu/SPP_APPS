@@ -67,7 +67,7 @@
 
             {{-- Kategori --}}
             <div style="flex:1; min-width:160px;">
-                <div class="label-caps" style="margin-bottom:6px;">Tahun Ajaran</div>
+                <div class="label-caps" style="margin-bottom:6px;">Kategori & Tahun Ajaran</div>
                 <select wire:model.live="filterKategori"
                     style="width:100%; background:var(--surface); border:1px solid rgba(0,0,0,0.1); border-radius:var(--r-sm); padding:8px 12px; font-size:13px; color:var(--ink); outline:none;">
                     <option value="">Semua Kategori</option>
@@ -108,68 +108,88 @@
         </div>
     </div>
 
+    {{-- ── BULK ACTION ─────────────────────────────────────── --}}
+    <div style="margin-bottom: 12px; display: flex; justify-content: flex-end; gap:8px; flex-wrap:wrap;">
+        {{-- Download Excel --}}
+        <a href="{{ route('admin.tagihan.export', array_filter([
+            'status'   => $filterStatus,
+            'kategori' => $filterKategori,
+            'bulan'    => $filterBulan,
+            'tahun'    => $filterTahun,
+        ])) }}"
+            class="btn"
+            style="padding:8px 16px; font-size:12px; background:rgba(5,150,105,0.09); color:#065f46; border:1px solid rgba(5,150,105,0.25); text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+            📥 Download Excel
+        </a>
+
+        {{-- Tandai Semua Telat --}}
+        <button wire:click="tandaiSemuaTelat"
+            wire:confirm="Tandai semua tagihan yang belum lunas sebagai terlambat?"
+            class="btn"
+            style="padding:8px 16px; font-size:12px; background:rgba(220,38,38,0.08); color:#991b1b; border:1px solid rgba(220,38,38,0.2);">
+            ⚠️ Tandai Semua Telat
+        </button>
+    </div>
+
     {{-- ── TABLE ──────────────────────────────────────────── --}}
-    <div class="table-card">
-        <table>
+    <div class="table-card" style="border-radius:16px; box-shadow:0 2px 16px rgba(0,0,0,0.06); overflow:hidden;">
+        <div style="overflow-x:auto;">
+        <table style="width:100%; table-layout:auto; border-collapse:collapse;">
             <thead>
-                <tr>
-                    <th>Santri</th>
-                    <th>Tahun Ajaran</th>
-                    <th>Periode</th>
-                    <th>Nominal</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
+                <tr style="background:linear-gradient(135deg,rgba(6,95,70,0.08),rgba(16,185,129,0.04)); border-bottom:2px solid rgba(6,95,70,0.12);">
+                    <th style="text-align:left; padding:14px 20px; font-size:11px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--em-700); min-width:200px;">Santri</th>
+                    <th style="text-align:left; padding:14px 16px; font-size:11px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--em-700); min-width:150px;">Kategori & Tahun Ajaran</th>
+                    <th style="text-align:left; padding:14px 16px; font-size:11px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--em-700); min-width:100px;">Periode</th>
+                    <th style="text-align:left; padding:14px 16px; font-size:11px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--em-700); min-width:110px;">Nominal</th>
+                    <th style="text-align:left; padding:14px 16px; font-size:11px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--em-700); min-width:110px;">Status</th>
+                    <th style="text-align:left; padding:14px 16px; font-size:11px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--em-700); min-width:260px;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($tagihans as $tagihan)
-                    <tr x-data="{ confirmDelete: false }">
+                    <tr x-data="{ confirmDelete: false }" style="border-bottom:1px solid rgba(0,0,0,0.05); transition:background 0.15s;" onmouseover="this.style.background='rgba(16,185,129,0.04)'" onmouseout="this.style.background='transparent'">
 
                         {{-- Santri --}}
-                        <td>
+                        <td style="padding:14px 20px;">
                             <div class="santri-info">
-                                <div class="santri-avatar santri-avatar--em">
+                                <div class="santri-avatar santri-avatar--em" style="font-size:12px; font-weight:700;">
                                     {{ strtoupper(substr($tagihan->siswa->nama_siswa ?? '?', 0, 2)) }}
                                 </div>
                                 <div>
-                                    <div class="santri-name">{{ $tagihan->siswa->nama_siswa ?? '—' }}</div>
-                                    <div class="santri-id">{{ $tagihan->siswa->nis ?? '—' }} · Kelas
-                                        {{ $tagihan->siswa->kelas ?? '—' }}</div>
+                                    <div class="santri-name" style="font-weight:600;">{{ $tagihan->siswa->nama_siswa ?? '—' }}</div>
+                                    <div class="santri-id">{{ $tagihan->siswa->nis ?? '—' }} &middot; Kelas {{ $tagihan->siswa->kelas ?? '—' }}</div>
                                 </div>
                             </div>
                         </td>
 
-                        {{-- Tahun Ajaran --}}
-                        <td>
-                            <span class="chip chip--default">
+                        {{-- Kategori & Tahun Ajaran --}}
+                        <td style="padding:14px 16px;">
+                            <span class="chip chip--default" style="font-size:11.5px; font-weight:600; letter-spacing:0.02em;">
                                 {{ $tagihan->kategori_spp->tahun_ajaran ?? '—' }}
                             </span>
                         </td>
 
                         {{-- Periode --}}
-                        <td>
-                            <div style="font-weight:500; font-size:13.5px;">{{ $tagihan->bulan }}</div>
-                            <div class="santri-id">{{ $tagihan->tahun }}</div>
+                        <td style="padding:14px 16px;">
+                            <div style="font-weight:600; font-size:13.5px; color:var(--ink);">{{ $tagihan->bulan }}</div>
+                            <div class="santri-id" style="font-size:11px;">{{ $tagihan->tahun }}</div>
                         </td>
 
                         {{-- Nominal --}}
-                        <td>
-                            <span class="amount text-emerald">
+                        <td style="padding:14px 16px;">
+                            <span class="amount text-emerald" style="font-weight:700; font-size:13.5px;">
                                 Rp {{ number_format($tagihan->kategori_spp->nominal_spp ?? 0, 0, ',', '.') }}
                             </span>
                         </td>
 
                         {{-- Status --}}
-                        <td>
+                        <td style="padding:14px 16px;">
                             @if ($tagihan->status_tagihan === 'Lunas')
-                                <span class="badge badge--lunas">Lunas</span>
+                                <span class="badge badge--lunas" style="font-size:11px; padding:4px 10px; border-radius:20px; font-weight:600;">✓ Lunas</span>
                             @else
-                                <span class="badge badge--pending">Belum Lunas</span>
-
-                                {{-- Tambahan Indikator Terlambat untuk Admin --}}
+                                <span class="badge badge--pending" style="font-size:11px; padding:4px 10px; border-radius:20px; font-weight:600;">● Belum Lunas</span>
                                 @if ($tagihan->is_terlambat)
-                                    <div
-                                        style="font-size:11px; color:#dc2626; margin-top:6px; display:flex; align-items:center; gap:4px; font-weight:500;">
+                                    <div style="font-size:10.5px; color:#dc2626; margin-top:5px; display:flex; align-items:center; gap:3px; font-weight:600;">
                                         ⚠️ Lewat Jatuh Tempo
                                     </div>
                                 @endif
@@ -177,38 +197,47 @@
                         </td>
 
                         {{-- Aksi --}}
-                        <td>
-                            <div class="flex items-center gap-2 flex-wrap">
+                        <td style="white-space:nowrap; padding:14px 20px 14px 16px;">
+                            <div style="display:flex; align-items:center; gap:6px; flex-wrap:nowrap;">
 
                                 {{-- Tandai Lunas --}}
                                 @if ($tagihan->status_tagihan !== 'Lunas')
                                     <button wire:click="tandaiLunas({{ $tagihan->id_tagihan }})"
-                                        wire:confirm="Tandai tagihan ini sebagai Lunas?" class="btn"
-                                        style="padding:5px 12px; font-size:11px; background:rgba(6,95,70,0.1); color:var(--em-800); border:1px solid rgba(6,95,70,0.2);">
+                                        wire:confirm="Tandai tagihan ini sebagai Lunas?"
+                                        class="btn"
+                                        style="padding:4px 10px; font-size:11px; white-space:nowrap; background:rgba(6,95,70,0.1); color:var(--em-800); border:1px solid rgba(6,95,70,0.2);">
                                         ✓ Lunas
                                     </button>
 
-                                    {{-- Kirim Email Pengingat --}}
+                                    {{-- Kirim Email --}}
                                     <button wire:click="kirimPengingatEmail({{ $tagihan->id_tagihan }})"
-                                        wire:loading.attr="disabled" class="btn"
-                                        style="padding:5px 12px; font-size:11px; background:rgba(217,119,6,0.08); color:var(--gd-700); border:1px solid rgba(217,119,6,0.2);">
-                                        <span wire:loading.remove
-                                            wire:target="kirimPengingatEmail({{ $tagihan->id_tagihan }})">📧
-                                            Email</span>
-                                        <span wire:loading
-                                            wire:target="kirimPengingatEmail({{ $tagihan->id_tagihan }})">⏳...</span>
+                                        wire:loading.attr="disabled"
+                                        class="btn"
+                                        style="padding:4px 10px; font-size:11px; white-space:nowrap; background:rgba(217,119,6,0.08); color:var(--gd-700); border:1px solid rgba(217,119,6,0.2);">
+                                        <span wire:loading.remove wire:target="kirimPengingatEmail({{ $tagihan->id_tagihan }})">📧 Email</span>
+                                        <span wire:loading wire:target="kirimPengingatEmail({{ $tagihan->id_tagihan }})">⏳...</span>
                                     </button>
+
+                                    {{-- Telat --}}
+                                    @if(!$tagihan->is_terlambat)
+                                        <button wire:click="simulateLate({{ $tagihan->id_tagihan }})"
+                                            wire:confirm="Tandai tagihan ini sebagai terlambat?"
+                                            class="btn"
+                                            style="padding:4px 10px; font-size:11px; white-space:nowrap; background:rgba(220,38,38,0.08); color:#991b1b; border:1px solid rgba(220,38,38,0.2);">
+                                            ⚠️ Telat
+                                        </button>
+                                    @endif
                                 @endif
 
                                 {{-- Edit --}}
                                 <button wire:click="openEdit({{ $tagihan->id_tagihan }})" class="btn btn--secondary"
-                                    style="padding:5px 12px; font-size:11px;">
+                                    style="padding:4px 10px; font-size:11px; white-space:nowrap;">
                                     Edit
                                 </button>
 
                                 {{-- Hapus --}}
                                 <button @click="confirmDelete = true" class="btn"
-                                    style="padding:5px 12px; font-size:11px; background:rgba(220,38,38,0.08); color:#991b1b;">
+                                    style="padding:4px 10px; font-size:11px; white-space:nowrap; background:rgba(220,38,38,0.08); color:#991b1b;">
                                     Hapus
                                 </button>
                             </div>
@@ -256,6 +285,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>{{-- end overflow-x:auto --}}
 
         {{-- Pagination --}}
         @if ($tagihans->hasPages())

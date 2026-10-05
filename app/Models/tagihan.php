@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
-#[Fillable(['id_siswa', 'id_kategori', 'bulan', 'tahun', 'status_tagihan'])]
+#[Fillable(['id_siswa', 'id_kategori', 'bulan', 'tahun', 'status_tagihan', 'is_force_late'])]
 class Tagihan extends Model
 {
     protected $primaryKey = 'id_tagihan';
@@ -31,6 +31,11 @@ class Tagihan extends Model
         // Jika sudah lunas, tidak mungkin terlambat
         if ($this->status_tagihan === 'Lunas') {
             return false;
+        }
+
+        // Jika disimulasikan telat untuk demo
+        if ($this->is_force_late) {
+            return true;
         }
 
         // Mapping nama bulan Indonesia ke angka

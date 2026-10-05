@@ -56,6 +56,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/kategori/{kategori}/edit', KategoriEdit::class)->name('kategori.edit');
         Route::get('/kategori/{kategori}', KategoriShow::class)->name('kategori.show');
         Route::get('/tagihan', TagihanIndex::class)->name('tagihan.index');
+        Route::get('/tagihan/export', [\App\Http\Controllers\ExportLaporanController::class, 'exportTagihanAdmin'])->name('tagihan.export');
 
         Route::get('/dashboard', AdminDashboardIndex::class)->name('dashboard.index');
     });

@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kategori_spps', function (Blueprint $table) {
-            $table->id('id_kategori');
-            $table->string('tahun_ajaran');
-            $table->integer('nominal_spp');
-            $table->timestamps();
+        Schema::table('tagihans', function (Blueprint $table) {
+            $table->boolean('is_force_late')->default(false)->after('status_tagihan');
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kategori_spps');
+        Schema::table('tagihans', function (Blueprint $table) {
+            $table->dropColumn('is_force_late');
+        });
     }
 };
